@@ -1,6 +1,6 @@
 # go-locales
 
-Library to make glibc locale data accessible in go.
+Library to make [GNU C Library Locales](https://sourceware.org/glibc/wiki/Locales) accessible in go.
 
 ```go
 import (
