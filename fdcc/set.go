@@ -1,9 +1,11 @@
 package fdcc
 
+// Set is the complete FDCC document
 type Set struct {
 	Categories []*Category
 }
 
+// Category is a grouping of directives
 type Category struct {
 	Name string
 	Body []*Line
@@ -17,6 +19,7 @@ func (c *Category) CopiesFrom() string {
 	return ""
 }
 
+// Line is a directive within a category
 type Line struct {
 	Identifier string
 	Operands   []string
