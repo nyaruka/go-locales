@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
-	locales.Query("es_EC", locales.LC_TIME, "d_fmt")  // "%d/%m/%y"
+	locales.Query("es_EC", locales.LC_TIME, "abday")                       // []string{"dom", ..., "sáb"}
+	locales.QueryString("fr_CA", locales.LC_NAME, "name_fmt")              // "%d%t%g%t%m%t%f"
+	locales.QueryInteger("zh_CN", locales.LC_MONETARY, "int_frac_digits")  // 2
 }
 ```

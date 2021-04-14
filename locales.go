@@ -26,6 +26,17 @@ func init() {
 	}
 }
 
+// Query returns the operands of the given locale + category + key
 func Query(localeName string, lc localedata.LC, key string) ([]string, error) {
 	return database.Query(localeName, lc, key)
+}
+
+// QueryString is a helper for keys which are a single string
+func QueryString(localeName string, lc localedata.LC, key string) (string, error) {
+	return database.QueryString(localeName, lc, key)
+}
+
+// QueryInteger is a helper for keys which are a single integer
+func QueryInteger(localeName string, lc localedata.LC, key string) (int, error) {
+	return database.QueryInteger(localeName, lc, key)
 }

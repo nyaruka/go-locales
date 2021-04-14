@@ -3,6 +3,7 @@ package localedata
 import (
 	"embed"
 	"fmt"
+	"strconv"
 
 	"github.com/nyaruka/go-locales/fdcc"
 
@@ -80,6 +81,7 @@ func LoadDatabase() (*Database, error) {
 	return &Database{locales}, nil
 }
 
+// Query returns the operands of the given locale + category + key
 func (d *Database) Query(localeName string, lc LC, key string) ([]string, error) {
 	locale := d.locales[localeName]
 	if locale == nil {
@@ -101,4 +103,29 @@ func (d *Database) Query(localeName string, lc LC, key string) ([]string, error)
 	}
 
 	return operands, nil
+}
+
+// QueryString is a helper for keys which are a single string
+func (d *Database) QueryString(localeName string, lc LC, key string) (string, error) {
+	ops, err := d.Query(localeName, lc, key)
+	if err != nil {
+		return "", err
+	}
+	if len(ops) < 1 {
+		return "", fmt.Errorf("key %s has no operands", key)
+	}
+	return ops[0], nil
+}
+
+// QueryInteger is a helper for keys which are a single integer
+func (d *Database) QueryInteger(localeName string, lc LC, key string) (int, error) {
+	op, err := d.QueryString(localeName, lc, key)
+	if err != nil {
+		return 0, err
+	}
+	val, err := strconv.Atoi(op)
+	if err != nil {
+		return 0, fmt.Errorf("key %s is not an integer", key)
+	}
+	return val, nil
 }
