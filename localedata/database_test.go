@@ -26,6 +26,7 @@ func TestQuery(t *testing.T) {
 		{"es_EC", locales.LC_MONETARY, "int_frac_digits", []string{"2"}, ""},
 		{"es_EC", locales.LC_TIME, "abday", []string{"dom", "lun", "mar", "mié", "jue", "vie", "sáb"}, ""}, // copies from es_BO
 		{"es_EC", locales.LC_TIME, "d_fmt", []string{"%d/%m/%y"}, ""},
+		{"uk_UA", locales.LC_TIME, "abday", []string{"нд", "пн", "вт", "ср", "чт", "пт", "сб"}, ""},
 
 		{"xx_XX", locales.LC_TIME, "d_fmt", nil, "no such locale xx_XX"},
 		{"es_EC", localedata.LC("LC_GOATS"), "d_fmt", nil, "no such category LC_GOATS in locale es_EC"},

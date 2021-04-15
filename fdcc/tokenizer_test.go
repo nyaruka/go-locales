@@ -42,10 +42,24 @@ func TestTokenizer(t *testing.T) {
 			},
 		},
 		{
-			"% comment1 \nhola %", // comment and a single char
+			"% comment1 \n%comment2\nhola", // comments at start of line
 			[]*fdcc.Token{
 				{"hola", fdcc.TokenTypeIdentifier},
-				{"%", fdcc.TokenTypeChar},
+			},
+		},
+		{
+			"hola %comment\nthing", // trailing comment then newline
+			[]*fdcc.Token{
+				{"hola", fdcc.TokenTypeIdentifier},
+				{"\n", fdcc.TokenTypeNewLine},
+				{"thing", fdcc.TokenTypeIdentifier},
+			},
+		},
+		{
+			"hola %comment /\nthing", // trailing comment then escaped newline
+			[]*fdcc.Token{
+				{"hola", fdcc.TokenTypeIdentifier},
+				{"thing", fdcc.TokenTypeIdentifier},
 			},
 		},
 	}

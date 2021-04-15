@@ -37,6 +37,10 @@ type Token struct {
 	Type  TokenType
 }
 
+func (t *Token) String() string {
+	return fmt.Sprintf("%s[%d]", t.Value, t.Type)
+}
+
 type Tokenizer struct {
 	input       *Input
 	CommentChar rune
@@ -86,8 +90,9 @@ func (t *Tokenizer) Next() (*Token, error) {
 			t.input.Next() // discard it
 			continue
 		}
-		if p == t.CommentChar && (t.input.Prev() == rune(0) || t.input.Prev() == '\n') {
-			t.readLineRemainder()
+		if p == t.CommentChar {
+			trailing := t.input.Prev() != rune(0) && t.input.Prev() != '\n'
+			t.readComment(trailing)
 			continue
 		}
 		if unicode.IsSpace(p) {
@@ -173,13 +178,20 @@ func (t *Tokenizer) readInteger() (*Token, error) {
 	return &Token{Value: b.String(), Type: TokenTypeInteger}, nil
 }
 
-func (t *Tokenizer) readLineRemainder() string {
+func (t *Tokenizer) readComment(trailing bool) string {
 	b := strings.Builder{}
 	for {
-		r := t.input.Next()
-		if r == '\n' || r == rune(0) {
+		r := t.input.Peek()
+		if trailing && r == t.EscapeChar {
 			break
 		}
+		if r == '\n' || r == rune(0) {
+			if !trailing {
+				t.input.Next()
+			}
+			break
+		}
+		t.input.Next()
 		b.WriteRune(r)
 	}
 	return b.String()

@@ -14,6 +14,7 @@ import (
 func TestParser(t *testing.T) {
 	file, err := ioutil.ReadFile("../localedata/locales/es_BO")
 	require.NoError(t, err)
+
 	p := fdcc.NewParser(bytes.NewReader(file))
 	set, err := p.Parse()
 	assert.NoError(t, err)
