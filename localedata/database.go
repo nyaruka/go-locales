@@ -3,6 +3,7 @@ package localedata
 import (
 	"embed"
 	"fmt"
+	"sort"
 	"strconv"
 
 	"github.com/nyaruka/go-locales/fdcc"
@@ -17,6 +18,7 @@ type LC string
 
 type Database struct {
 	locales map[string]*Locale
+	codes   []string
 }
 
 type Locale struct {
@@ -58,13 +60,14 @@ func LoadDatabase() (*Database, error) {
 	}
 
 	locales := make(map[string]*Locale, len(files))
+	codes := make([]string, 0, len(files))
 
 	for _, f := range files {
-		name := f.Name()
+		code := f.Name()
 
-		file, err := static.Open(fmt.Sprintf("locales/%s", name))
+		file, err := static.Open(fmt.Sprintf("locales/%s", code))
 		if err != nil {
-			return nil, errors.Wrapf(err, "unable to open file %s", name)
+			return nil, errors.Wrapf(err, "unable to open file %s", code)
 		}
 
 		defer file.Close()
@@ -73,24 +76,28 @@ func LoadDatabase() (*Database, error) {
 
 		set, err := p.Parse()
 		if err != nil {
-			return nil, errors.Wrapf(err, "unable to parse file %s", name)
+			return nil, errors.Wrapf(err, "unable to parse file %s", code)
 		}
 
-		locales[name] = newLocale(set)
+		locales[code] = newLocale(set)
+		codes = append(codes, code)
 	}
-	return &Database{locales}, nil
+
+	sort.Strings(codes)
+
+	return &Database{locales, codes}, nil
 }
 
 // Query returns the operands of the given locale + category + key
-func (d *Database) Query(localeName string, lc LC, key string) ([]string, error) {
-	locale := d.locales[localeName]
+func (d *Database) Query(code string, lc LC, key string) ([]string, error) {
+	locale := d.locales[code]
 	if locale == nil {
-		return nil, fmt.Errorf("no such locale %s", localeName)
+		return nil, fmt.Errorf("no such locale %s", code)
 	}
 
 	category := locale.categories[lc]
 	if category == nil {
-		return nil, fmt.Errorf("no such category %s in locale %s", lc, localeName)
+		return nil, fmt.Errorf("no such category %s in locale %s", lc, code)
 	}
 
 	if category.copiesFrom != "" {
@@ -99,15 +106,15 @@ func (d *Database) Query(localeName string, lc LC, key string) ([]string, error)
 
 	operands, exists := category.values[key]
 	if !exists {
-		return nil, fmt.Errorf("no such key %s in category %s in locale %s", key, lc, localeName)
+		return nil, fmt.Errorf("no such key %s in category %s in locale %s", key, lc, code)
 	}
 
 	return operands, nil
 }
 
 // QueryString is a helper for keys which are a single string
-func (d *Database) QueryString(localeName string, lc LC, key string) (string, error) {
-	ops, err := d.Query(localeName, lc, key)
+func (d *Database) QueryString(code string, lc LC, key string) (string, error) {
+	ops, err := d.Query(code, lc, key)
 	if err != nil {
 		return "", err
 	}
@@ -118,8 +125,8 @@ func (d *Database) QueryString(localeName string, lc LC, key string) (string, er
 }
 
 // QueryInteger is a helper for keys which are a single integer
-func (d *Database) QueryInteger(localeName string, lc LC, key string) (int, error) {
-	op, err := d.QueryString(localeName, lc, key)
+func (d *Database) QueryInteger(code string, lc LC, key string) (int, error) {
+	op, err := d.QueryString(code, lc, key)
 	if err != nil {
 		return 0, err
 	}
@@ -128,4 +135,9 @@ func (d *Database) QueryInteger(localeName string, lc LC, key string) (int, erro
 		return 0, fmt.Errorf("key %s is not an integer", key)
 	}
 	return val, nil
+}
+
+// Codes returns the list of all locale codes (mostly BCP47 tho includes other special values such as POSIX, i18n etc), sorted alphabetically
+func (d *Database) Codes() []string {
+	return d.codes
 }

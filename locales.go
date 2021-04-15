@@ -40,3 +40,8 @@ func QueryString(localeName string, lc localedata.LC, key string) (string, error
 func QueryInteger(localeName string, lc localedata.LC, key string) (int, error) {
 	return database.QueryInteger(localeName, lc, key)
 }
+
+// Codes returns the list of all locale codes, sorted alphabetically
+func Codes() []string {
+	return database.Codes()
+}

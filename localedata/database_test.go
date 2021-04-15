@@ -104,3 +104,14 @@ func TestQueryInteger(t *testing.T) {
 		}
 	}
 }
+
+func TestCodes(t *testing.T) {
+	database, err := localedata.LoadDatabase()
+	require.NoError(t, err)
+
+	codes := database.Codes()
+	assert.Equal(t, 355, len(codes))
+	assert.Equal(t, "POSIX", codes[0])
+	assert.Equal(t, "aa_DJ", codes[1])
+	assert.Equal(t, "aa_ER", codes[2])
+}
