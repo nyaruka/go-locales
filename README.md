@@ -18,3 +18,27 @@ locales.QueryInteger("zh_CN", locales.LC_MONETARY, "int_frac_digits")  // 2
 
 locales.Codes()  // []string{"POSIX", "aa_DJ", "aa_ER", ... }
 ```
+
+## localesdump
+
+This command line tool can be used to create JSON dumps of select locale data, e.g.
+
+```
+localesdump --pretty days=LC_TIME.day short_days=LC_TIME.abday
+```
+
+Extracts the given keywords from each locale and produces JSON like:
+
+```
+{
+    "aa_DJ": {
+        "days": ["Acaada", "Etleeni", "Talaata", "Arbaqa", "Kamiisi", "Gumqata", "Sabti"],
+        "short_days": ["Aca", "Etl", "Tal", "Arb", "Kam", "Gum", "Sab"]
+    },
+    "aa_ER": {
+        "days": ["Acaada", "Etleeni", "Talaata", "Arbaqa", "Kamiisi", "Gumqata", "Sabti"],
+        "short_days": ["Aca", "Etl", "Tal", "Arb", "Kam", "Gum", "Sab"]
+    },
+    ...
+}
+```
