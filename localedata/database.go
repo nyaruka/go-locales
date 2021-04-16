@@ -14,6 +14,11 @@ import (
 //go:embed locales/*
 var static embed.FS
 
+// TODO
+var defaults = map[string][]string{
+	"LC_TIME.week": {"7", "19971130", "7"},
+}
+
 type LC string
 
 type Database struct {
@@ -106,7 +111,10 @@ func (d *Database) Query(code string, lc LC, keyword string) ([]string, error) {
 
 	operands, exists := category.values[keyword]
 	if !exists {
-		return nil, fmt.Errorf("no such keyword %s in category %s in locale %s", keyword, lc, code)
+		operands, exists = defaults[fmt.Sprintf("%s.%s", lc, keyword)]
+		if !exists {
+			return nil, fmt.Errorf("no such keyword %s in category %s in locale %s", keyword, lc, code)
+		}
 	}
 
 	return operands, nil
