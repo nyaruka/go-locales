@@ -13,7 +13,7 @@ type Category struct {
 
 // CopiesFrom returns the name of the set to copy this category from if the first line is the copy keyword
 func (c *Category) CopiesFrom() string {
-	if len(c.Body) == 1 && c.Body[0].Identifier == "copy" && len(c.Body[0].Operands) >= 1 {
+	if len(c.Body) == 1 && c.Body[0].Keyword == "copy" && len(c.Body[0].Operands) >= 1 {
 		return c.Body[0].Operands[0]
 	}
 	return ""
@@ -21,6 +21,6 @@ func (c *Category) CopiesFrom() string {
 
 // Line is a directive within a category
 type Line struct {
-	Identifier string
-	Operands   []string
+	Keyword  string
+	Operands []string
 }

@@ -26,19 +26,19 @@ func init() {
 	}
 }
 
-// Query returns the operands of the given locale + category + key
-func Query(localeName string, lc localedata.LC, key string) ([]string, error) {
-	return database.Query(localeName, lc, key)
+// Query returns the operands of the given locale + category + keyword
+func Query(localeName string, lc localedata.LC, keyword string) ([]string, error) {
+	return database.Query(localeName, lc, keyword)
 }
 
-// QueryString is a helper for keys which are a single string
-func QueryString(localeName string, lc localedata.LC, key string) (string, error) {
-	return database.QueryString(localeName, lc, key)
+// QueryString is a helper for keywords which are a single string
+func QueryString(localeName string, lc localedata.LC, keyword string) (string, error) {
+	return database.QueryString(localeName, lc, keyword)
 }
 
-// QueryInteger is a helper for keys which are a single integer
-func QueryInteger(localeName string, lc localedata.LC, key string) (int, error) {
-	return database.QueryInteger(localeName, lc, key)
+// QueryInteger is a helper for keywords which are a single integer
+func QueryInteger(localeName string, lc localedata.LC, keyword string) (int, error) {
+	return database.QueryInteger(localeName, lc, keyword)
 }
 
 // Codes returns the list of all locale codes, sorted alphabetically

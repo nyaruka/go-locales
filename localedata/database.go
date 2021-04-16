@@ -47,7 +47,7 @@ func newCategory(c *fdcc.Category) *Category {
 
 	values := make(map[string][]string, len(c.Body))
 	for _, l := range c.Body {
-		values[l.Identifier] = l.Operands
+		values[l.Keyword] = l.Operands
 	}
 
 	return &Category{values: values}
@@ -89,7 +89,7 @@ func LoadDatabase() (*Database, error) {
 }
 
 // Query returns the operands of the given locale + category + key
-func (d *Database) Query(code string, lc LC, key string) ([]string, error) {
+func (d *Database) Query(code string, lc LC, keyword string) ([]string, error) {
 	locale := d.locales[code]
 	if locale == nil {
 		return nil, fmt.Errorf("no such locale %s", code)
@@ -101,38 +101,38 @@ func (d *Database) Query(code string, lc LC, key string) ([]string, error) {
 	}
 
 	if category.copiesFrom != "" {
-		return d.Query(category.copiesFrom, lc, key)
+		return d.Query(category.copiesFrom, lc, keyword)
 	}
 
-	operands, exists := category.values[key]
+	operands, exists := category.values[keyword]
 	if !exists {
-		return nil, fmt.Errorf("no such key %s in category %s in locale %s", key, lc, code)
+		return nil, fmt.Errorf("no such keyword %s in category %s in locale %s", keyword, lc, code)
 	}
 
 	return operands, nil
 }
 
 // QueryString is a helper for keys which are a single string
-func (d *Database) QueryString(code string, lc LC, key string) (string, error) {
-	ops, err := d.Query(code, lc, key)
+func (d *Database) QueryString(code string, lc LC, keyword string) (string, error) {
+	ops, err := d.Query(code, lc, keyword)
 	if err != nil {
 		return "", err
 	}
 	if len(ops) < 1 {
-		return "", fmt.Errorf("key %s has no operands", key)
+		return "", fmt.Errorf("keyword %s has no operands", keyword)
 	}
 	return ops[0], nil
 }
 
 // QueryInteger is a helper for keys which are a single integer
-func (d *Database) QueryInteger(code string, lc LC, key string) (int, error) {
-	op, err := d.QueryString(code, lc, key)
+func (d *Database) QueryInteger(code string, lc LC, keyword string) (int, error) {
+	op, err := d.QueryString(code, lc, keyword)
 	if err != nil {
 		return 0, err
 	}
 	val, err := strconv.Atoi(op)
 	if err != nil {
-		return 0, fmt.Errorf("key %s is not an integer", key)
+		return 0, fmt.Errorf("keyword %s is not an integer", keyword)
 	}
 	return val, nil
 }

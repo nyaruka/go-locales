@@ -93,7 +93,7 @@ func (p *Parser) readCategory(token string) (*Category, error) {
 			// ignore empty lines
 		} else {
 			operands := p.readOperands()
-			category.Body = append(category.Body, &Line{Identifier: t.Value, Operands: operands})
+			category.Body = append(category.Body, &Line{Keyword: t.Value, Operands: operands})
 		}
 	}
 

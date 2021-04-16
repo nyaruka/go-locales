@@ -18,7 +18,7 @@ func TestQuery(t *testing.T) {
 	tests := []struct {
 		locale   string
 		lc       localedata.LC
-		key      string
+		keyword  string
 		expected []string
 		err      string
 	}{
@@ -30,12 +30,12 @@ func TestQuery(t *testing.T) {
 
 		{"xx_XX", locales.LC_TIME, "d_fmt", nil, "no such locale xx_XX"},
 		{"es_EC", localedata.LC("LC_GOATS"), "d_fmt", nil, "no such category LC_GOATS in locale es_EC"},
-		{"es_EC", locales.LC_TIME, "num_goats", nil, "no such key num_goats in category LC_TIME in locale es_BO"},
+		{"es_EC", locales.LC_TIME, "num_goats", nil, "no such keyword num_goats in category LC_TIME in locale es_BO"},
 	}
 
 	for _, tc := range tests {
-		desc := fmt.Sprintf("%s > %s > %s", tc.locale, tc.lc, tc.key)
-		ops, err := database.Query(tc.locale, tc.lc, tc.key)
+		desc := fmt.Sprintf("%s > %s > %s", tc.locale, tc.lc, tc.keyword)
+		ops, err := database.Query(tc.locale, tc.lc, tc.keyword)
 		if tc.err == "" {
 			assert.NoError(t, err, "unexpected error in %s", desc)
 			assert.Equal(t, tc.expected, ops, "operands mismatch in %s", desc)
@@ -53,7 +53,7 @@ func TestQueryString(t *testing.T) {
 	tests := []struct {
 		locale   string
 		lc       localedata.LC
-		key      string
+		keyword  string
 		expected string
 		err      string
 	}{
@@ -65,8 +65,8 @@ func TestQueryString(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		desc := fmt.Sprintf("%s > %s > %s", tc.locale, tc.lc, tc.key)
-		op, err := database.QueryString(tc.locale, tc.lc, tc.key)
+		desc := fmt.Sprintf("%s > %s > %s", tc.locale, tc.lc, tc.keyword)
+		op, err := database.QueryString(tc.locale, tc.lc, tc.keyword)
 		if tc.err == "" {
 			assert.NoError(t, err, "unexpected error in %s", desc)
 			assert.Equal(t, tc.expected, op, "operand mismatch in %s", desc)
@@ -84,18 +84,18 @@ func TestQueryInteger(t *testing.T) {
 	tests := []struct {
 		locale   string
 		lc       localedata.LC
-		key      string
+		keyword  string
 		expected int
 		err      string
 	}{
 		{"es_EC", locales.LC_MONETARY, "int_frac_digits", 2, ""},
 		{"zh_CN", locales.LC_ADDRESS, "country_isbn", 7, ""},
-		{"es_EC", locales.LC_TIME, "d_fmt", 0, "key d_fmt is not an integer"},
+		{"es_EC", locales.LC_TIME, "d_fmt", 0, "keyword d_fmt is not an integer"},
 	}
 
 	for _, tc := range tests {
-		desc := fmt.Sprintf("%s > %s > %s", tc.locale, tc.lc, tc.key)
-		op, err := database.QueryInteger(tc.locale, tc.lc, tc.key)
+		desc := fmt.Sprintf("%s > %s > %s", tc.locale, tc.lc, tc.keyword)
+		op, err := database.QueryInteger(tc.locale, tc.lc, tc.keyword)
 		if tc.err == "" {
 			assert.NoError(t, err, "unexpected error in %s", desc)
 			assert.Equal(t, tc.expected, op, "operand mismatch in %s", desc)

@@ -20,9 +20,9 @@ func TestParser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 12, len(set.Categories))
 	assert.Equal(t, "LC_IDENTIFICATION", set.Categories[0].Name)
-	assert.Equal(t, "title", set.Categories[0].Body[0].Identifier)
+	assert.Equal(t, "title", set.Categories[0].Body[0].Keyword)
 	assert.Equal(t, []string{"Spanish locale for Bolivia"}, set.Categories[0].Body[0].Operands)
-	assert.Equal(t, "abday", set.Categories[6].Body[0].Identifier)
+	assert.Equal(t, "abday", set.Categories[6].Body[0].Keyword)
 	assert.Equal(t, []string{"dom", "lun", "mar", "mié", "jue", "vie", "sáb"}, set.Categories[6].Body[0].Operands)
 }
 
