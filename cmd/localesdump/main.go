@@ -11,12 +11,11 @@ import (
 
 	"github.com/nyaruka/go-locales"
 	"github.com/nyaruka/go-locales/localedata"
-
 	"github.com/pkg/errors"
 )
 
-// matches locale codes in the form xx_XX
-var bcp47Regex = regexp.MustCompile(`^[a-z][a-z]_[A-Z][A-Z]$`)
+// matches locale codes in the form xx_YY or xxx_YY
+var bcp47Regex = regexp.MustCompile(`^[a-z]{2,3}_[A-Z]{2}$`)
 
 // data dumped for a single locale
 type localeDump map[string][]string
@@ -107,7 +106,7 @@ func mergeLocales(data map[string]localeDump) map[string]localeDump {
 	distinctByLang := make(map[string][]localeDump, len(data))
 
 	for code, dump := range data {
-		lang := code[:2]
+		lang := strings.SplitN(code, "_", 2)[0]
 		distinct := true
 
 		for _, existing := range distinctByLang[lang] {
@@ -125,7 +124,7 @@ func mergeLocales(data map[string]localeDump) map[string]localeDump {
 	merged := make(map[string]localeDump, len(data))
 
 	for code, dump := range data {
-		lang := code[:2]
+		lang := strings.SplitN(code, "_", 2)[0]
 		variesByCountry := len(distinctByLang[lang]) > 1
 
 		if variesByCountry {

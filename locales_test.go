@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/nyaruka/go-locales"
-
 	"github.com/stretchr/testify/assert"
 )
 
