@@ -22,6 +22,6 @@ func TestLocales(t *testing.T) {
 	assert.Equal(t, 2, i)
 
 	codes := locales.Codes()
-	assert.Equal(t, 355, len(codes))
-	assert.Equal(t, "POSIX", codes[0])
+	assert.Equal(t, 360, len(codes))
+	assert.Equal(t, "C", codes[0])
 }

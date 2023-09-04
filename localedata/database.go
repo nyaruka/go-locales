@@ -7,10 +7,11 @@ import (
 	"strconv"
 
 	"github.com/nyaruka/go-locales/fdcc"
-
 	"github.com/pkg/errors"
 )
 
+// from https://sourceware.org/git/?p=glibc.git;a=tree;f=localedata/locales
+//
 //go:embed locales/*
 var static embed.FS
 
