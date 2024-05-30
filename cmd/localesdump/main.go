@@ -11,7 +11,6 @@ import (
 
 	"github.com/nyaruka/go-locales"
 	"github.com/nyaruka/go-locales/localedata"
-	"github.com/pkg/errors"
 )
 
 // matches locale codes in the form xx_YY or xxx_YY
@@ -89,7 +88,7 @@ func extractData(mappings map[string]string) (map[string]localeDump, error) {
 
 			ops, err := locales.Query(code, localedata.LC(category), keyword)
 			if err != nil {
-				return nil, errors.Wrapf(err, "error querying path %s", path)
+				return nil, fmt.Errorf("error querying path %s: %w", path, err)
 			}
 
 			locale[key] = ops
