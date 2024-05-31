@@ -120,7 +120,7 @@ func (p *Parser) readOperands() []string {
 
 var regexUnicode = regexp.MustCompile(`<U[[:xdigit:]]{4}>`)
 
-// UnescapeUnicode escapes unicode sequences of the form <U0000>
+// UnescapeUnicode unescapes unicode sequences of the form <U0000>
 func UnescapeUnicode(s string) string {
 	unescaped := regexUnicode.ReplaceAllStringFunc(s, func(m string) string {
 		hex := m[2:6]
