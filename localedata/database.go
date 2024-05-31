@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/nyaruka/go-locales/fdcc"
-	"github.com/pkg/errors"
 )
 
 // from https://sourceware.org/git/?p=glibc.git;a=tree;f=localedata/locales
@@ -73,7 +72,7 @@ func LoadDatabase() (*Database, error) {
 
 		file, err := static.Open(fmt.Sprintf("locales/%s", code))
 		if err != nil {
-			return nil, errors.Wrapf(err, "unable to open file %s", code)
+			return nil, fmt.Errorf("unable to open file %s: %w", code, err)
 		}
 
 		defer file.Close()
@@ -82,7 +81,7 @@ func LoadDatabase() (*Database, error) {
 
 		set, err := p.Parse()
 		if err != nil {
-			return nil, errors.Wrapf(err, "unable to parse file %s", code)
+			return nil, fmt.Errorf("unable to parse file %s: %w", code, err)
 		}
 
 		locales[code] = newLocale(set)
