@@ -50,36 +50,33 @@ copy "iso14651_t1"
 END LC_COLLATE
 
 LC_TIME
-% siakwa kati, kuswa kati, kakamuk kati, lî wainhka kati, lih mairin kati, lî kati, pastara kati, sikla kati, wîs kati, waupasa kati, yahbra kati, trisu kati
 mon "siakwa kati";/
     "kuswa kati";/
     "kakamuk kati";/
-    "l<U00EE> wainhka kati";/
+    "lî wainhka kati";/
     "lih mairin kati";/
-    "l<U00EE> kati";/
+    "lî kati";/
     "pastara kati";/
     "sikla kati";/
-    "w<U00EE>s kati";/
+    "wîs kati";/
     "waupasa kati";/
     "yahbra kati";/
     "trisu kati"
 
 % re-visit with Jairo
-% siakwa kati, kuswa kati, kakamuk kati, lî wainhka kati, lih mairin kati, lî kati, pastara kati, sikla kati, wîs kati, waupasa kati, yahbra kati, trisu kati
-abmon "siakwa kati";/
-      "kuswa kati";/
-      "kakamuk kati";/
-      "l<U00EE> wainhka kati";/
-      "lih mairin kati";/
-      "l<U00EE> kati";/
-      "pastara kati";/
-      "sikla kati";/
-      "w<U00EE>s kati";/
-      "waupasa kati";/
-      "yahbra kati";/
-      "trisu kati"
+abmon "siakwa";/
+      "kuswa";/
+      "kakamuk";/
+      "lî wainhka";/
+      "lih mairin";/
+      "lî";/
+      "pastara";/
+      "sikla";/
+      "wîs";/
+      "waupasa";/
+      "yahbra";/
+      "trisu"
 
-% sandi, mundi, tiusdi, wensde, tausde, praidi, satadi
 day "sandi";/
     "mundi";/
     "tiusdi";/
@@ -87,7 +84,6 @@ day "sandi";/
     "tausde";/
     "praidi";/
     "satadi"
-% san, mun, tius, wens, taus, prai, sat
 abday "san";/
       "mun";/
       "tius";/
@@ -169,7 +165,7 @@ country_ab2  "NI"
 country_ab3  "NIC"
 country_num   558
 country_car   "NIC"
-lang_name     "M<U00ED>skitu"
+lang_name     "Mískitu"
 lang_term     "miq"
 lang_lib      "miq"
 END LC_ADDRESS
