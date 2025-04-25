@@ -111,7 +111,7 @@ func TestCodes(t *testing.T) {
 	require.NoError(t, err)
 
 	codes := database.Codes()
-	assert.Equal(t, 367, len(codes))
+	assert.Equal(t, 369, len(codes))
 	assert.Equal(t, "C", codes[0])
 	assert.Equal(t, "POSIX", codes[1])
 	assert.Equal(t, "aa_DJ", codes[2])
