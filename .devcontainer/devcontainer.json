@@ -1,0 +1,19 @@
+{
+    "name": "GoLocales",
+    "image": "mcr.microsoft.com/devcontainers/go:dev-1.25-trixie",
+    "features": {},
+    "runArgs": [
+        "--name=dev-golocales"
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "editor.formatOnSave": true,
+                "editor.rulers": [
+                    120
+                ]
+            }
+        }
+    }
+}
