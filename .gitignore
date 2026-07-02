@@ -1,5 +1,7 @@
+# General
+*~
 .DS_Store
-.vscode
+.vscode/
 .devcontainer
 deploy
 fabfile.py
@@ -9,3 +11,9 @@ fabfile.py
 CLAUDE.md
 CODEX.md
 AGENTS.md
+
+# Go
+coverage.text
+
+# Project specific
+/localesdump
