@@ -2,3 +2,9 @@
 .vscode
 deploy
 fabfile.py
+
+# AI
+.claude/
+CLAUDE.md
+CODEX.md
+AGENTS.md
