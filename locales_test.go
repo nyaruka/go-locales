@@ -23,4 +23,13 @@ func TestLocales(t *testing.T) {
 	codes := locales.Codes()
 	assert.Equal(t, 369, len(codes))
 	assert.Equal(t, "C", codes[0])
+
+	// LC_XLITERATE is its own category and isn't defined by any locale, so must not silently
+	// resolve to another category
+	_, err = locales.Query("es_EC", locales.LC_XLITERATE, "yesexpr")
+	assert.EqualError(t, err, "no such category LC_XLITERATE in locale es_EC")
+
+	ss, err = locales.Query("es_EC", locales.LC_MESSAGES, "yesexpr")
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"^[+1sSyY]"}, ss)
 }

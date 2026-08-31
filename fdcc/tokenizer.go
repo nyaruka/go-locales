@@ -2,11 +2,16 @@ package fdcc
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
+
+// returned by Input when the reader yields a byte sequence which isn't valid UTF-8
+var errInvalidUTF8 = errors.New("invalid UTF-8 encoding")
 
 type TokenizerError struct {
 	Message  string
@@ -62,7 +67,7 @@ func (t *Tokenizer) Next() (*Token, error) {
 		p := t.input.Peek()
 
 		if p == rune(0) {
-			break
+			return nil, t.endOfInput()
 		}
 		if p == t.EscapeChar && !escaped {
 			t.input.Next() // discard it
@@ -113,8 +118,24 @@ func (t *Tokenizer) Next() (*Token, error) {
 		t.input.Next()
 		return &Token{Value: string(p), Type: TokenTypeChar}, nil
 	}
+}
 
-	return nil, io.EOF
+// called when the input returns a zero rune, which means either that we've reached the end of it,
+// that reading from it failed, or that it contains an actual NUL char - which isn't valid in an
+// FDCC document and would otherwise silently truncate it.
+func (t *Tokenizer) endOfInput() error {
+	err := t.input.Err()
+
+	switch {
+	case errors.Is(err, io.EOF):
+		return io.EOF
+	case errors.Is(err, errInvalidUTF8):
+		return newTokenizerError("invalid UTF-8 encoding", t.input.Position())
+	case err != nil:
+		return fmt.Errorf("error reading input: %w", err)
+	default:
+		return newTokenizerError("unexpected NUL char", t.input.Position())
+	}
 }
 
 func (t *Tokenizer) readIdentifier() (*Token, error) {
@@ -146,8 +167,14 @@ func (t *Tokenizer) readString() (*Token, error) {
 			continue
 		}
 
-		if r == rune(0) || (r == '\n' && !escaped) {
-			return nil, fmt.Errorf("unterminated string literal")
+		if r == rune(0) {
+			if errors.Is(t.input.Err(), io.EOF) {
+				return nil, newTokenizerError("unterminated string literal", t.input.Position())
+			}
+			return nil, t.endOfInput()
+		}
+		if r == '\n' && !escaped {
+			return nil, newTokenizerError("unterminated string literal", t.input.Position())
 		}
 
 		if r != '\n' {
@@ -185,7 +212,10 @@ func (t *Tokenizer) readComment(trailing bool) string {
 		if trailing && r == t.EscapeChar {
 			break
 		}
-		if r == '\n' || r == rune(0) {
+		if r == rune(0) {
+			break // leave it for Next to report as end of input, a read error or a NUL char
+		}
+		if r == '\n' {
 			if !trailing {
 				t.input.Next()
 			}
@@ -207,17 +237,40 @@ type Input struct {
 	peeked *rune
 	prev   *rune
 	pos    Position
+	err    error
 }
 
 func NewInput(src io.Reader) *Input {
 	return &Input{reader: bufio.NewReader(src)}
 }
 
+// reads the next rune from the reader, recording why it couldn't be read if it can't be
+func (i *Input) readRune() rune {
+	r, size, err := i.reader.ReadRune()
+	if err != nil {
+		if i.err == nil {
+			i.err = err
+		}
+		return rune(0)
+	}
+
+	// ReadRune reports an invalid encoding as a single byte decoding to U+FFFD, whereas an actual
+	// U+FFFD in the input is 3 bytes long
+	if r == utf8.RuneError && size == 1 {
+		if i.err == nil {
+			i.err = errInvalidUTF8
+		}
+		return rune(0)
+	}
+
+	return r
+}
+
 func (i *Input) Peek() rune {
 	if i.peeked != nil {
 		return *i.peeked
 	}
-	r, _, _ := i.reader.ReadRune()
+	r := i.readRune()
 	i.peeked = &r
 	return r
 }
@@ -229,8 +282,7 @@ func (i *Input) Next() rune {
 		i.peeked = nil
 		next = r
 	} else {
-		r, _, _ := i.reader.ReadRune()
-		next = r
+		next = i.readRune()
 	}
 
 	if i.prev == nil || *i.prev == '\n' {
@@ -253,4 +305,11 @@ func (i *Input) Prev() rune {
 
 func (i *Input) Position() Position {
 	return i.pos
+}
+
+// Err returns the first error encountered reading from the underlying reader, or nil if no read has
+// failed. It is io.EOF once the input has been fully consumed. Callers need this to tell a zero rune
+// returned by Peek or Next apart from an actual NUL char in the input.
+func (i *Input) Err() error {
+	return i.err
 }
