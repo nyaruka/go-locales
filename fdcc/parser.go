@@ -53,7 +53,10 @@ func (p *Parser) Parse() (*Set, error) {
 }
 
 func (p *Parser) readPreCategoryStatement(token string) error {
-	operands := p.readOperands()
+	operands, err := p.readOperands()
+	if err != nil {
+		return err
+	}
 
 	switch token {
 	case "comment_char":
@@ -87,12 +90,24 @@ func (p *Parser) readCategory(token string) (*Category, error) {
 		}
 
 		if t.Value == "END" {
-			p.tokenizer.Next() // read category name again after END
+			end, err := p.tokenizer.Next() // category name is repeated after END
+			if err == io.EOF {
+				return nil, fmt.Errorf("unexpected EOF reading end of category %s", category.Name)
+			}
+			if err != nil {
+				return nil, err
+			}
+			if end.Value != category.Name {
+				return nil, fmt.Errorf("expected END %s but found END %s", category.Name, end.Value)
+			}
 			break
 		} else if t.Type == TokenTypeNewLine {
 			// ignore empty lines
 		} else {
-			operands := p.readOperands()
+			operands, err := p.readOperands()
+			if err != nil {
+				return nil, err
+			}
 			category.Body = append(category.Body, &Line{Keyword: t.Value, Operands: operands})
 		}
 	}
@@ -100,11 +115,17 @@ func (p *Parser) readCategory(token string) (*Category, error) {
 	return category, nil
 }
 
-func (p *Parser) readOperands() []string {
+func (p *Parser) readOperands() ([]string, error) {
 	operands := make([]string, 0, 5)
 	for {
-		t, _ := p.tokenizer.Next()
-		if t == nil || t.Type == TokenTypeNewLine {
+		t, err := p.tokenizer.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		if t.Type == TokenTypeNewLine {
 			break
 		}
 
@@ -115,7 +136,7 @@ func (p *Parser) readOperands() []string {
 
 		operands = append(operands, UnescapeUnicode(operand))
 	}
-	return operands
+	return operands, nil
 }
 
 var regexUnicode = regexp.MustCompile(`<U[[:xdigit:]]{4}>`)

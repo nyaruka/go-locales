@@ -117,3 +117,26 @@ func TestCodes(t *testing.T) {
 	assert.Equal(t, "aa_DJ", codes[2])
 	assert.Equal(t, "aa_ER", codes[3])
 }
+
+func TestQueryDoesntLeakDatabase(t *testing.T) {
+	database, err := localedata.LoadDatabase()
+	require.NoError(t, err)
+
+	// callers mustn't be able to modify the database via the slices returned to them
+	ops, err := database.Query("es_EC", locales.LC_TIME, "abday")
+	require.NoError(t, err)
+	ops[0] = "xxx"
+
+	ops, err = database.Query("es_EC", locales.LC_TIME, "abday")
+	require.NoError(t, err)
+	assert.Equal(t, "dom", ops[0])
+
+	codes := database.Codes()
+	codes[0] = "xxx"
+	assert.Equal(t, "C", database.Codes()[0])
+
+	// keywords with no operands still give an empty rather than nil slice
+	ops, err = database.Query("aa_DJ", locales.LC_CTYPE, "translit_start")
+	require.NoError(t, err)
+	assert.Equal(t, []string{}, ops)
+}

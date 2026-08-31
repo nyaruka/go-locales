@@ -3,6 +3,7 @@ package localedata
 import (
 	"embed"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -70,18 +71,9 @@ func LoadDatabase() (*Database, error) {
 	for _, f := range files {
 		code := f.Name()
 
-		file, err := static.Open(fmt.Sprintf("locales/%s", code))
+		set, err := parseFile(code)
 		if err != nil {
-			return nil, fmt.Errorf("unable to open file %s: %w", code, err)
-		}
-
-		defer file.Close()
-
-		p := fdcc.NewParser(file)
-
-		set, err := p.Parse()
-		if err != nil {
-			return nil, fmt.Errorf("unable to parse file %s: %w", code, err)
+			return nil, err
 		}
 
 		locales[code] = newLocale(set)
@@ -93,31 +85,60 @@ func LoadDatabase() (*Database, error) {
 	return &Database{locales, codes}, nil
 }
 
+// parses a single locale file, closing it before returning
+func parseFile(code string) (*fdcc.Set, error) {
+	file, err := static.Open(fmt.Sprintf("locales/%s", code))
+	if err != nil {
+		return nil, fmt.Errorf("unable to open file %s: %w", code, err)
+	}
+
+	defer file.Close()
+
+	set, err := fdcc.NewParser(file).Parse()
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse file %s: %w", code, err)
+	}
+
+	return set, nil
+}
+
 // Query returns the operands of the given locale + category + key
 func (d *Database) Query(code string, lc LC, keyword string) ([]string, error) {
-	locale := d.locales[code]
-	if locale == nil {
-		return nil, fmt.Errorf("no such locale %s", code)
-	}
+	visited := make(map[string]bool, 4)
 
-	category := locale.categories[lc]
-	if category == nil {
-		return nil, fmt.Errorf("no such category %s in locale %s", lc, code)
-	}
-
-	if category.copiesFrom != "" {
-		return d.Query(category.copiesFrom, lc, keyword)
-	}
-
-	operands, exists := category.values[keyword]
-	if !exists {
-		operands, exists = defaults[fmt.Sprintf("%s.%s", lc, keyword)]
-		if !exists {
-			return nil, fmt.Errorf("no such keyword %s in category %s in locale %s", keyword, lc, code)
+	// a category can copy from another locale, which can itself copy from another, so follow the
+	// chain, refusing to go round in circles
+	for {
+		locale := d.locales[code]
+		if locale == nil {
+			return nil, fmt.Errorf("no such locale %s", code)
 		}
-	}
 
-	return operands, nil
+		category := locale.categories[lc]
+		if category == nil {
+			return nil, fmt.Errorf("no such category %s in locale %s", lc, code)
+		}
+
+		if category.copiesFrom == "" {
+			operands, exists := category.values[keyword]
+			if !exists {
+				operands, exists = defaults[fmt.Sprintf("%s.%s", lc, keyword)]
+				if !exists {
+					return nil, fmt.Errorf("no such keyword %s in category %s in locale %s", keyword, lc, code)
+				}
+			}
+
+			// return a copy so callers can't modify the database, keeping empty lists non-nil
+			return append(make([]string, 0, len(operands)), operands...), nil
+		}
+
+		if visited[code] {
+			return nil, fmt.Errorf("circular copy of category %s in locale %s", lc, code)
+		}
+		visited[code] = true
+
+		code = category.copiesFrom
+	}
 }
 
 // QueryString is a helper for keys which are a single string
@@ -147,5 +168,5 @@ func (d *Database) QueryInteger(code string, lc LC, keyword string) (int, error)
 
 // Codes returns the list of all locale codes (mostly BCP47 tho includes other special values such as POSIX, i18n etc), sorted alphabetically
 func (d *Database) Codes() []string {
-	return d.codes
+	return slices.Clone(d.codes) // copy so callers can't modify the database
 }
